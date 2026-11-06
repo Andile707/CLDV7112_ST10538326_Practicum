@@ -1,0 +1,18 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<h2>Field dashboard</h2>
+<form method="get" class="d-flex gap-2 mb-3"><input name="fieldId" value="@ViewBag.FieldId" class="form-control" aria-label="Field ID" /><button class="btn btn-success">Load</button></form>@if(Model.Error != null){
+<div class="alert alert-warning">@Model.Error</div>
+}
+<h4>Latest telemetry</h4>
+<table class="table table-striped"><thead><tr><th>Device</th><th>Field</th><th>Moisture</th><th>Temperature</th><th>UTC time</th></tr></thead><tbody>@foreach(var x in Model.Readings){
+    <tr><td>@x.DeviceId</td><td>@x.FieldId</td><td>@x.SoilMoisture</td><td>@x.Temperature</td><td>@x.TimestampUtc</td></tr>
+}
+</tbody></table>
+<h4>Devices</h4>
+<table class="table"><thead><tr><th>Device</th><th>Status</th><th>Updated UTC</th></tr></thead><tbody>@foreach(var x in Model.Devices){
+    <tr><td>@x.DeviceId</td><td>@x.Status</td><td>@x.UpdatedUtc</td></tr>
+}
+</tbody></table>

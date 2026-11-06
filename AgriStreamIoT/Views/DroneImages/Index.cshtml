@@ -1,0 +1,8 @@
+﻿@model DroneImageModel
+@{
+    ViewData["Title"] = "Upload drone image";
+}
+<h2>Upload drone image</h2>@if(TempData["Message"] != null){
+<div class="alert alert-success">@TempData["Message"]</div>
+}
+<form method="post" enctype="multipart/form-data"><div asp-validation-summary="All" class="text-danger"></div><label asp-for="FieldId"></label><input asp-for="FieldId" class="form-control mb-3" /><label asp-for="Image"></label><input asp-for="Image" type="file" accept=".jpg,.jpeg,.png" class="form-control mb-3" /><button class="btn btn-success">Upload</button></form>

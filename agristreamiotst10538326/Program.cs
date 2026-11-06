@@ -1,20 +1,28 @@
-using Azure.Monitor.OpenTelemetry.Exporter;
-using Microsoft.Azure.Functions.Worker;
+
+using Azure.Storage.Queues;
 using Microsoft.Azure.Functions.Worker.Builder;
-using Microsoft.Azure.Functions.Worker.OpenTelemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OpenTelemetry;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
-if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
+builder.Services.AddSingleton(sp =>
 {
-    builder.Services.AddOpenTelemetry()
-        .UseFunctionsWorkerDefaults()
-        .UseAzureMonitorExporter();
-}
+    var configuration = sp.GetRequiredService<
+        Microsoft.Extensions.Configuration.IConfiguration>();
+
+    var connectionString =
+        configuration["AzureWebJobsStorage"];
+
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        throw new InvalidOperationException(
+            "AzureWebJobsStorage is not configured.");
+    }
+
+    return new QueueServiceClient(connectionString);
+});
 
 builder.Build().Run();

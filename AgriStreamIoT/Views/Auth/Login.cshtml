@@ -1,0 +1,6 @@
+﻿@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+<h2>Login with your credentials</h2>
+<form asp-controller="Auth" asp-action="Login" method="post" class="card p-4" style="max-width:440px"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="mb-3"><label asp-for="Username" class="form-label"></label><input asp-for="Username" class="form-control" /><span asp-validation-for="Username" class="text-danger"></span></div><div class="mb-3"><label asp-for="Password" class="form-label"></label><input asp-for="Password" class="form-control" type="password" /><span asp-validation-for="Password" class="text-danger"></span></div><button type="submit" class="btn btn-success">Sign in</button></form>
