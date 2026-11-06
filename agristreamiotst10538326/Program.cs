@@ -1,28 +1,62 @@
 
 using Azure.Storage.Queues;
 using Microsoft.Azure.Functions.Worker.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using agristreamiotst10538326.Services;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
+// ==========================================
+// 1. CONFIGURE AZURE FUNCTIONS
+// ==========================================
+
 builder.ConfigureFunctionsWebApplication();
 
-builder.Services.AddSingleton(sp =>
+// ==========================================
+// 2. CONFIGURE AZURE STORAGE
+// ==========================================
+
+var storageConnectionString =
+    builder.Configuration["AzureWebJobsStorage"];
+
+if (string.IsNullOrWhiteSpace(storageConnectionString))
 {
-    var configuration = sp.GetRequiredService<
-        Microsoft.Extensions.Configuration.IConfiguration>();
+    throw new InvalidOperationException(
+        "AzureWebJobsStorage is not configured. " +
+        "Check local.settings.json.");
+}
 
-    var connectionString =
-        configuration["AzureWebJobsStorage"];
+// ==========================================
+// 3. REGISTER AZURE QUEUE STORAGE
+// ==========================================
 
-    if (string.IsNullOrWhiteSpace(connectionString))
-    {
-        throw new InvalidOperationException(
-            "AzureWebJobsStorage is not configured.");
-    }
+builder.Services.AddSingleton(
+    new QueueServiceClient(storageConnectionString));
 
-    return new QueueServiceClient(connectionString);
-});
+// ==========================================
+// 4. BUILD THE FUNCTIONS APPLICATION
+// ==========================================
 
-builder.Build().Run();
+var app = builder.Build();
+
+// ==========================================
+// 5. SEED SAMPLE TELEMETRY DATA
+// ==========================================
+
+// Only seed data when explicitly enabled
+// in the local development environment.
+
+if (builder.Environment.IsDevelopment() &&
+    builder.Configuration["SeedSampleTelemetry"] == "true")
+{
+    await TelemetrySeeder.SeedAsync(
+        storageConnectionString);
+}
+
+// ==========================================
+// 6. START AZURE FUNCTIONS
+// ==========================================
+
+app.Run();
